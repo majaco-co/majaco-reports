@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="86400">
+<title>Pipeline Prediction Report — 11 March 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+    :root {
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --border: #e2e8f0;
+        --text: #1a202c;
+        --text-light: #718096;
+        --accent: #2563eb;
+        --accent-light: #dbeafe;
+        --green: #059669;
+        --green-light: #d1fae5;
+        --red: #dc2626;
+        --red-light: #fee2e2;
+        --amber: #d97706;
+        --amber-light: #fef3c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .header .subtitle {
+        color: var(--text-light);
+        font-size: 0.95rem;
+    }
+    .header .meta {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    /* KPI cards */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .kpi {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+    }
+    .kpi .value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+    .kpi .label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+    .kpi.green .value { color: var(--green); }
+    .kpi.red .value { color: var(--red); }
+    .kpi.amber .value { color: var(--amber); }
+
+    /* Section */
+    .section {
+        margin-bottom: 2.5rem;
+    }
+    .section h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .section .desc {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+    }
+
+    /* Charts */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 768px) {
+        .chart-grid { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    .chart-card h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .chart-card canvas {
+        max-height: 300px;
+    }
+    .chart-card.wide {
+        grid-column: 1 / -1;
+    }
+
+    /* Tables */
+    .table-wrap {
+        overflow-x: auto;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+    th {
+        background: var(--bg);
+        font-weight: 600;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid var(--border);
+        white-space: nowrap;
+    }
+    td {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f7fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Likelihood colours */
+    .lk-high { color: var(--green); font-weight: 600; }
+    .lk-mid { color: var(--amber); font-weight: 600; }
+    .lk-low { color: var(--red); font-weight: 600; }
+    .gap-pos { color: var(--green); font-weight: 600; }
+    .gap-neg { color: var(--red); font-weight: 600; }
+
+    /* Insight box */
+    .insight {
+        background: var(--accent-light);
+        border-left: 4px solid var(--accent);
+        border-radius: 0 8px 8px 0;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+    .insight strong { color: var(--accent); }
+    .insight.warn {
+        background: var(--red-light);
+        border-left-color: var(--red);
+    }
+    .insight.warn strong { color: var(--red); }
+    .insight.good {
+        background: var(--green-light);
+        border-left-color: var(--green);
+    }
+    .insight.good strong { color: var(--green); }
+
+    /* Momentum badges */
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .badge.at-risk { background: var(--red-light); color: var(--red); }
+    .badge.stalling { background: var(--amber-light); color: var(--amber); }
+    .badge.advancing { background: var(--green-light); color: var(--green); }
+
+    .at-risk-row td { background: #fff5f5; }
+    .stalling-row td { background: #fffbeb; }
+
+    .commentary {
+        max-width: 300px;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        line-height: 1.4;
+    }
+
+    /* Momentum KPI mini-grid */
+    .momentum-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .momentum-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+    }
+    .momentum-card.advancing { border-left: 4px solid var(--green); }
+    .momentum-card.stalling { border-left: 4px solid var(--amber); }
+    .momentum-card.at-risk { border-left: 4px solid var(--red); }
+    .momentum-card .m-value { font-size: 1.5rem; font-weight: 700; }
+    .momentum-card .m-sub { font-size: 0.8rem; color: var(--text-light); }
+    .momentum-card.advancing .m-value { color: var(--green); }
+    .momentum-card.stalling .m-value { color: var(--amber); }
+    .momentum-card.at-risk .m-value { color: var(--red); }
+
+    /* Footer */
+    .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <h1>Pipeline Prediction Report</h1>
+    <div class="subtitle">How accurate are our pipeline predictions? Where should we recalibrate?</div>
+    <div class="meta">Report generated 11 March 2026 &middot; Latest snapshot: 2026-03-11 &middot; 2 snapshots in database</div>
+</div>
+
+<!-- KPIs -->
+<p class="desc" style="margin-bottom: 0.75rem;">Pipeline metrics are for <strong>Pursuing</strong> opportunities only. Won/Lost are from <strong>Closed</strong> deals.</p>
+<div class="kpi-grid">
+    <div class="kpi">
+        <div class="value">37</div>
+        <div class="label">Pursuing Deals</div>
+    </div>
+    <div class="kpi">
+        <div class="value">&pound;17,816,200</div>
+        <div class="label">Pursuing &mdash; Total Fees</div>
+    </div>
+    <div class="kpi amber">
+        <div class="value">&pound;2,762,390</div>
+        <div class="label">Pursuing &mdash; Weighted</div>
+    </div>
+    <div class="kpi green">
+        <div class="value">20</div>
+        <div class="label">Closed &mdash; Won</div>
+    </div>
+    <div class="kpi red">
+        <div class="value">25</div>
+        <div class="label">Closed &mdash; Lost</div>
+    </div>
+    <div class="kpi green">
+        <div class="value">&pound;5,321,180</div>
+        <div class="label">Closed &mdash; Won Revenue</div>
+    </div>
+</div>
+
+<!-- Commentary Momentum Analysis -->
+<div class="section">
+    <h2>Commentary Momentum Analysis</h2>
+    <p class="desc">Keyword analysis of Next Steps and Notes across all pursuing opportunities.
+    Classifies each deal's commentary as advancing (active engagement), stalling (waiting/chasing),
+    or at risk (negative signals detected).</p>
+
+    <div class="momentum-grid">
+        <div class="momentum-card advancing">
+            <div class="m-value">7 deals</div>
+            <div class="m-sub">Advancing &middot; &pound;367,440 weighted</div>
+        </div>
+        <div class="momentum-card stalling">
+            <div class="m-value">12 deals</div>
+            <div class="m-sub">Stalling &middot; &pound;428,200 weighted</div>
+        </div>
+        <div class="momentum-card at-risk">
+            <div class="m-value">5 deals</div>
+            <div class="m-sub">At Risk &middot; &pound;691,000 weighted</div>
+        </div>
+    </div>
+
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>Deal Count by Momentum</h3>
+            <canvas id="momentumCounts"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Weighted Value by Momentum</h3>
+            <canvas id="momentumValues"></canvas>
+        </div>
+    </div>
+
+    <div class="insight warn"><strong>Attention:</strong> &pound;1,119,200 of weighted pipeline (17 deals) shows stalling or at-risk signals in the commentary. Review next steps below.</div>
+
+    <h3 style="margin: 1.5rem 0 0.75rem;">Deals Requiring Attention</h3>
+    <p class="desc">Sorted by weighted value. These deals have stalling or negative signals in their commentary.</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Signal</th>
+                    <th>Opportunity</th>
+                    <th>Stage</th>
+                    <th class="num">Weighted</th>
+                    <th>Next Steps</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody><tr class="at-risk-row">
+            <td><span class="badge at-risk">At Risk</span></td>
+            <td>Europe Snacks - Project</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;525,000</td>
+            <td class="commentary">Wait for Rikin’s response to text (Toby confirming date for dinner 9th March) - follow up with maturity assessment and a...</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Greencore - Implementation Support</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;150,000</td>
+            <td class="commentary">Catch up with Jim and Mark in a couple of weeks (mid March)</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="at-risk-row">
+            <td><span class="badge at-risk">At Risk</span></td>
+            <td>LT Foods - OEE Improvement</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">&pound;105,000</td>
+            <td class="commentary">Toby to call Umesh to see how they’re progressing - call end April</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Samworth Brothers - Group Data Visualisation</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;75,000</td>
+            <td class="commentary">Mike Dennis to follow up with Lee Sullivan again</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="at-risk-row">
+            <td><span class="badge at-risk">At Risk</span></td>
+            <td>Lucozade Ribena (Suntory UK) - Capacity</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;50,000</td>
+            <td class="commentary">Toby has chased Chris Spray asking if he can go higher up the Suntory Chain</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Fenmarc Produce - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">&pound;50,000</td>
+            <td class="commentary">Toby to ask Mike Dennis to reach out to Jim Waller (done) - next step, await Mike’s reply</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Samworth Bradgate - Food to Go</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;50,000</td>
+            <td class="commentary">Mike Dennis to contact Joe Garthwaite (now in Transformation role at Samworth - good fit for this opportunity)</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>VeeTee - Service Level & Capacity</td>
+            <td>1 - Potential</td>
+            <td class="num">&pound;30,000</td>
+            <td class="commentary">James Littlewood stay in touch with Andy</td>
+            <td>James Littlewood</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>GU Puddings - Stock Modelling</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;27,500</td>
+            <td class="commentary">Proposal sent to Mark Young (Stockholding Optimisation & Modelling, £55k fixed fee). Awaiting review and feedback. Chase...</td>
+            <td>James Littlewood</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Redzone Deployment 2</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;27,000</td>
+            <td class="commentary">Will Milnthorpe contacted 9 Mar — awaiting confirmation by EOW 13 Mar. Frank / Sam R unavailable for 2nd deployment. Saa...</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="at-risk-row">
+            <td><span class="badge at-risk">At Risk</span></td>
+            <td>Pro-Pak Foods - Assessment</td>
+            <td>1 - Potential</td>
+            <td class="num">&pound;6,000</td>
+            <td class="commentary">Jon Guest (MD, Pro-Pak Foods) attending Becketts final presentation 17 Mar 2026. Follow up with Jon after the presentati...</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="at-risk-row">
+            <td><span class="badge at-risk">At Risk</span></td>
+            <td>AH Worth - Cost Out</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;5,000</td>
+            <td class="commentary">Nick Gale to stay in touch - as Matt Walton wants to have a go himself. Reach out Q3 2026</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Gymkhana Fine Foods - Ongoing Support at CPU</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;5,000</td>
+            <td class="commentary">Support Protolan equipment selection and wait until it’s in. Once Protolan have done equipment selection - Sam to be par...</td>
+            <td>Sam Rooza</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Langfords - Assessment</td>
+            <td>2 - 1st Call</td>
+            <td class="num">&pound;5,000</td>
+            <td class="commentary">Sam contacted Jon Faasse but he is off looking after a sick son. Sam to try again this week (w/c 9 Mar), or next week if...</td>
+            <td>Sam Rooza</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Red Sky Food Group (Delenco/Langfords) - Assessment</td>
+            <td>2 - 1st Call</td>
+            <td class="num">&pound;5,000</td>
+            <td class="commentary">Sam Rooza to reconnect (give him a call) with Jon Faasse.
+Spoke briefly Feb 19th - busy with sick son - to try again w/c...</td>
+            <td>Sam Rooza</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Butternut Box - Connected Worker & PowerBI Dash</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">&pound;2,500</td>
+            <td class="commentary">Awaiting feedback from David Nolan & James McCrea. Kev passing on Toby's message to check if anything top of mind at But...</td>
+            <td>Toby Parnell</td>
+        </tr><tr class="stalling-row">
+            <td><span class="badge stalling">Stalling</span></td>
+            <td>Clyde Fasteners - maji Licence</td>
+            <td>1 - Potential</td>
+            <td class="num">&pound;1,200</td>
+            <td class="commentary">Jamie to review and finalise the operational roadmap HTML report, then send to Scott and Alfie. Team to sign NDA. Toby t...</td>
+            <td>Jamie Diamond</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Positive Momentum -->
+<div class="section">
+    <h2>Positive Momentum: What&rsquo;s Driving the Pipeline Forward</h2>
+    <p class="desc">Deals classified as advancing based on their Next Steps and Notes commentary.
+    The signal chart shows which positive keywords appear most frequently &mdash; these are the behaviours that correlate with pipeline progression.</p>
+
+    <div class="insight good"><strong>7 deals (&pound;367,440 weighted) show active forward momentum</strong> &mdash; recent meetings, proposals sent, positive client signals, or confirmed next steps.</div>
+
+    <div class="chart-grid">
+        <div class="chart-card wide">
+            <h3>Most Common Positive Signals in Advancing Deals</h3>
+            <canvas id="positiveSignals"></canvas>
+        </div>
+    </div>
+
+    <h3 style="margin: 1.5rem 0 0.75rem;">Advancing Deals</h3>
+    <p class="desc">Sorted by weighted value. Green tags show the positive signals detected in their commentary.</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Signals</th>
+                    <th>Opportunity</th>
+                    <th>Stage</th>
+                    <th class="num">Weighted</th>
+                    <th>Next Steps</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td><span class="badge advancing">meeting arranged</span></td>
+            <td>Compleat - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">&pound;100,000</td>
+            <td class="commentary">- Meeting arranged - Nick contacted Lee Ormrod today (9 Feb 2026) to set up meeting
+- Find out during sales process why Newton are out - does this lea...</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td><span class="badge advancing">presenting</span> <span class="badge advancing">proposal submitted</span> <span class="badge advancing">confirmed</span></td>
+            <td>Pukka Pies - BOM & Waste</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;86,940</td>
+            <td class="commentary">Tim presenting proposal to SLT Friday 13 Mar, seeking £120k budget approval. Follow up Monday 16 Mar for outcome. If guarantee model preferred, additi...</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td><span class="badge advancing">assessment underway</span> <span class="badge advancing">agreed</span> <span class="badge advancing">started</span></td>
+            <td>Becketts - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">&pound;75,000</td>
+            <td class="commentary">Assessment underway — started 2 Mar 2026, going well. Pre-align session with Joe Cornes and Kris Kurowski on 16 Mar. Final presentation 17 Mar 2026.</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td><span class="badge advancing">strong potential</span></td>
+            <td>Hilton Food Group</td>
+            <td>2 - 1st Call</td>
+            <td class="num">&pound;50,000</td>
+            <td class="commentary">Nick to continue to keep engaging with Mark Allen</td>
+            <td>Nick Gale</td>
+        </tr><tr>
+            <td><span class="badge advancing">agreed</span> <span class="badge advancing">approved</span> <span class="badge advancing">progressing</span></td>
+            <td>Assisi Pet Care - Assessment</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">&pound;30,000</td>
+            <td class="commentary">Toby spoke to Ian Owen 5 Mar to coach him on managing Pawel through the process. Pawel has had a bereavement and taken time off. Call with Ian (withou...</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td><span class="badge advancing">reached out</span> <span class="badge advancing">call held</span> <span class="badge advancing">resonated strongly</span></td>
+            <td>Tayto - Cost Out</td>
+            <td>2 - 1st Call</td>
+            <td class="num">&pound;17,000</td>
+            <td class="commentary">Follow-up email sent 6 Mar 2026 to Mike Hancox and Martin McElhinney (CC: Paul Harvey, Sunny Pahal; BCC: Nick Gale) covering: assessment 3:1 guarantee...</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td><span class="badge advancing">signed</span> <span class="badge advancing">positive</span> <span class="badge advancing">keen to buy</span></td>
+            <td>Proper Snacks - Planning Tools Update</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">&pound;8,500</td>
+            <td class="commentary">James to confirm scope with Connor & Joe + agree day rate for the work
+
+James to send proposal to Connor 9/3</td>
+            <td>James Littlewood</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pipeline by Stage -->
+<div class="section">
+    <h2>Current Pipeline by Stage</h2>
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>Fees by Stage (Total vs Weighted)</h3>
+            <canvas id="stageFees"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Average Likelihood by Stage</h3>
+            <canvas id="stageLikelihood"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Prediction Accuracy -->
+<div class="section">
+    <h2>Prediction Accuracy: Are We Calibrated?</h2>
+    <p class="desc">Compares the likelihood we assigned to deals against the actual win rate at each stage.
+    A positive gap means we underestimate (pleasant surprises). A negative gap means we overestimate (need to be more critical).</p>
+
+    <div class="chart-grid">
+        <div class="chart-card wide">
+            <h3>Predicted Likelihood vs Actual Win Rate by Stage</h3>
+            <canvas id="accuracyChart"></canvas>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th class="num">Closed Deals</th>
+                    <th class="num">Won</th>
+                    <th class="num">Actual Win Rate</th>
+                    <th class="num">Avg Predicted Likelihood</th>
+                    <th class="num">Gap</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>1 - Potential</td>
+            <td class="num">7</td>
+            <td class="num">0</td>
+            <td class="num">0%</td>
+            <td class="num">15%</td>
+            <td class="num gap-neg">-15%</td>
+        </tr><tr>
+            <td>2 - 1st Call</td>
+            <td class="num">3</td>
+            <td class="num">0</td>
+            <td class="num">0%</td>
+            <td class="num">40%</td>
+            <td class="num gap-neg">-40%</td>
+        </tr><tr>
+            <td>3 - 1st Meet</td>
+            <td class="num">2</td>
+            <td class="num">0</td>
+            <td class="num">0%</td>
+            <td class="num">10%</td>
+            <td class="num gap-neg">-10%</td>
+        </tr><tr>
+            <td>4 - Ax Proposal</td>
+            <td class="num">4</td>
+            <td class="num">0</td>
+            <td class="num">0%</td>
+            <td class="num">30%</td>
+            <td class="num gap-neg">-30%</td>
+        </tr><tr>
+            <td>6 - Project Proposal</td>
+            <td class="num">8</td>
+            <td class="num">0</td>
+            <td class="num">0%</td>
+            <td class="num">14%</td>
+            <td class="num gap-neg">-14%</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Win & Loss Reasons -->
+<div class="section">
+    <h2>Why We Win &amp; Why We Lose</h2>
+    <p class="desc">Understanding win/loss patterns helps identify genuine buying signals vs red flags.</p>
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>Win Reasons</h3>
+            <canvas id="winReasons"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Loss Reasons (Red Flags)</h3>
+            <canvas id="lossReasons"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Win DNA -->
+<div class="section">
+    <h2>Win DNA: What Drives Closed Revenue</h2>
+    <p class="desc">Which win reasons generate the most revenue? This shows the commercial pattern behind majaco&rsquo;s wins.</p>
+    <div class="insight good"><strong>Assessment Output</strong>: 2 deals, &pound;3,518,000 total fees<br><strong>Track Record</strong>: 6 deals, &pound;459,400 total fees<br><strong>Won Tender</strong>: 1 deals, &pound;361,550 total fees<br><strong>Referral Trust</strong>: 4 deals, &pound;315,000 total fees<br><strong>Relationship</strong>: 4 deals, &pound;302,600 total fees<br><strong>Networking</strong>: 2 deals, &pound;227,030 total fees<br><strong>Capability</strong>: 1 deals, &pound;137,600 total fees</div>
+</div>
+
+<!-- Loss Autopsy by Stage -->
+<div class="section">
+    <h2>Loss Autopsy: Where Deals Die</h2>
+    <p class="desc">At which stages do deals fall out, and how much weighted value is lost at each stage?</p>
+    <div class="chart-grid">
+        <div class="chart-card wide">
+            <h3>Weighted Value Lost by Stage</h3>
+            <canvas id="lossByStage"></canvas>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Stage Reached</th>
+                    <th class="num">Deals Lost</th>
+                    <th class="num">Total Fees</th>
+                    <th class="num">Weighted Lost</th>
+                    <th>Reasons</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>6 - Project Proposal</td>
+            <td class="num">9</td>
+            <td class="num">&pound;5,213,000</td>
+            <td class="num">&pound;1,010,100</td>
+            <td class="commentary">Senior Client Blocked,Did Not Want Consultants,Did Not Like Proposal,Client Capacity,majaco Capacity,Wanted To Do Themselves,Cost And Not Enough Scale</td>
+        </tr><tr>
+            <td>1 - Potential</td>
+            <td class="num">7</td>
+            <td class="num">&pound;4,600,000</td>
+            <td class="num">&pound;735,000</td>
+            <td class="commentary">Went Silent,Fizzled Out,Wanted To Do Themselves</td>
+        </tr><tr>
+            <td>4 - Ax Proposal</td>
+            <td class="num">4</td>
+            <td class="num">&pound;2,850,000</td>
+            <td class="num">&pound;665,000</td>
+            <td class="commentary">Fizzled Out,Lost To Newton: Our Perceived Capacity,Not Enough Opportunity</td>
+        </tr><tr>
+            <td>3 - 1st Meet</td>
+            <td class="num">2</td>
+            <td class="num">&pound;2,500,000</td>
+            <td class="num">&pound;250,000</td>
+            <td class="commentary">Not Enough Opportunity</td>
+        </tr><tr>
+            <td>2 - 1st Call</td>
+            <td class="num">3</td>
+            <td class="num">&pound;400,000</td>
+            <td class="num">&pound;130,000</td>
+            <td class="commentary">Too Small For Us,Fizzled Out,Can't afford our Day Rate</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Owner Performance -->
+<div class="section">
+    <h2>Owner Pipeline Breakdown</h2>
+    <p class="desc">Pipeline and close performance by opportunity owner. Win rate is based on closed deals only (won / (won + lost)).</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th class="num">Pursuing</th>
+                    <th class="num">Pursuing Fees</th>
+                    <th class="num">Pursuing Weighted</th>
+                    <th class="num">Won</th>
+                    <th class="num">Lost</th>
+                    <th class="num">Win Rate</th>
+                    <th class="num">Won Revenue</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>Toby Parnell</td>
+            <td class="num">25</td>
+            <td class="num">&pound;15,224,200</td>
+            <td class="num">&pound;2,347,190</td>
+            <td class="num">14</td>
+            <td class="num">18</td>
+            <td class="num">44%</td>
+            <td class="num">&pound;3,109,080</td>
+        </tr><tr>
+            <td>Sam Rooza</td>
+            <td class="num">5</td>
+            <td class="num">&pound;1,760,000</td>
+            <td class="num">&pound;265,000</td>
+            <td class="num">1</td>
+            <td class="num">3</td>
+            <td class="num">25%</td>
+            <td class="num">&pound;72,000</td>
+        </tr><tr>
+            <td>James Littlewood</td>
+            <td class="num">4</td>
+            <td class="num">&pound;295,000</td>
+            <td class="num">&pound;74,000</td>
+            <td class="num">0</td>
+            <td class="num">0</td>
+            <td class="num"></td>
+            <td class="num">&pound;0</td>
+        </tr><tr>
+            <td>Nick Gale</td>
+            <td class="num">1</td>
+            <td class="num">&pound;500,000</td>
+            <td class="num">&pound;50,000</td>
+            <td class="num">0</td>
+            <td class="num">0</td>
+            <td class="num"></td>
+            <td class="num">&pound;0</td>
+        </tr><tr>
+            <td>Jack Taylor</td>
+            <td class="num">1</td>
+            <td class="num">&pound;25,000</td>
+            <td class="num">&pound;25,000</td>
+            <td class="num">1</td>
+            <td class="num">0</td>
+            <td class="num">100%</td>
+            <td class="num">&pound;25,000</td>
+        </tr><tr>
+            <td>Jamie Diamond</td>
+            <td class="num">1</td>
+            <td class="num">&pound;12,000</td>
+            <td class="num">&pound;1,200</td>
+            <td class="num">0</td>
+            <td class="num">0</td>
+            <td class="num"></td>
+            <td class="num">&pound;0</td>
+        </tr><tr>
+            <td>Sam Ellwood</td>
+            <td class="num">0</td>
+            <td class="num">&pound;0</td>
+            <td class="num">&pound;0</td>
+            <td class="num">0</td>
+            <td class="num">1</td>
+            <td class="num">0%</td>
+            <td class="num">&pound;0</td>
+        </tr><tr>
+            <td>Joe Millington</td>
+            <td class="num">0</td>
+            <td class="num">&pound;0</td>
+            <td class="num">&pound;0</td>
+            <td class="num">4</td>
+            <td class="num">3</td>
+            <td class="num">57%</td>
+            <td class="num">&pound;2,115,100</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pipeline Over Time -->
+<div class="section">
+    <h2>Pipeline Value Over Time</h2>
+    <p class="desc">Tracks how total and weighted pipeline value change week to week. More snapshots = richer trend data.</p>
+    <div class="chart-grid">
+        <div class="chart-card wide">
+            <h3>Total Fees vs Weighted Value</h3>
+            <canvas id="timeChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Won Deals -->
+<div class="section">
+    <h2>Won Deals</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Final Stage</th>
+                    <th class="num">Fees</th>
+                    <th class="num">Likelihood</th>
+                    <th>Win Reason</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>Vibrant Foods - Implementation</td>
+            <td>7 - Project Won</td>
+            <td class="num">1,890,000</td>
+            <td class="num">100%</td>
+            <td>Assessment Output</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>WARP Snacks - Project</td>
+            <td>7 - Project Won</td>
+            <td class="num">1,628,000</td>
+            <td class="num">100%</td>
+            <td>Assessment Output</td>
+            <td>Joe Millington</td>
+        </tr><tr>
+            <td>GU Puddings - Waste reduction</td>
+            <td>7 - Project Won</td>
+            <td class="num">361,550</td>
+            <td class="num">100%</td>
+            <td>Won Tender</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Pratts - Operational Improvement</td>
+            <td>7 - Project Won</td>
+            <td class="num">336,000</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Joe Millington</td>
+        </tr><tr>
+            <td>VCC - Operational Improvement</td>
+            <td>7 - Project Won</td>
+            <td class="num">227,030</td>
+            <td class="num">100%</td>
+            <td>Networking</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>SHP Value Added Services (Halo) - Operational improvement</td>
+            <td>7 - Project Won</td>
+            <td class="num">226,000</td>
+            <td class="num">100%</td>
+            <td>Referral Trust</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Vibrant Foods - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">170,700</td>
+            <td class="num">100%</td>
+            <td>Relationship</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>WARP Snacks - Commercial Dashboard</td>
+            <td>7 - Project Won</td>
+            <td class="num">137,600</td>
+            <td class="num">100%</td>
+            <td>Capability</td>
+            <td>Joe Millington</td>
+        </tr><tr>
+            <td>Ornua - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">72,000</td>
+            <td class="num">100%</td>
+            <td>Relationship</td>
+            <td>Sam Rooza</td>
+        </tr><tr>
+            <td>WARP Snacks - Operational Assessment</td>
+            <td>7 - Project Won</td>
+            <td class="num">49,200</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>WARP Snacks - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">49,200</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>GU Puddings - Strategy Support</td>
+            <td>7 - Project Won</td>
+            <td class="num">34,900</td>
+            <td class="num">100%</td>
+            <td>Relationship</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Gymkhana Fine Foods - Feasibility</td>
+            <td>7 - Project Won</td>
+            <td class="num">32,000</td>
+            <td class="num">100%</td>
+            <td>Referral Trust</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Pickenpack - Assessment (Attempt 1)</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">31,500</td>
+            <td class="num">100%</td>
+            <td>Referral Trust</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>GU Puddings - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">25,500</td>
+            <td class="num">100%</td>
+            <td>Referral Trust</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Redzone Deployment 1</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">25,000</td>
+            <td class="num">100%</td>
+            <td>Relationship</td>
+            <td>Jack Taylor</td>
+        </tr><tr>
+            <td>Pratts - Support Work</td>
+            <td>7 - Project Won</td>
+            <td class="num">13,500</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Joe Millington</td>
+        </tr><tr>
+            <td>Vibrant Foods - MRP</td>
+            <td>7 - Project Won</td>
+            <td class="num">7,500</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>GU Puddings - Training</td>
+            <td>7 - Project Won</td>
+            <td class="num">4,000</td>
+            <td class="num">100%</td>
+            <td>Track Record</td>
+            <td>Toby Parnell</td>
+        </tr><tr>
+            <td>Thrift + Day Rate Support</td>
+            <td>7 - Project Won</td>
+            <td class="num">0</td>
+            <td class="num">100%</td>
+            <td>Networking</td>
+            <td>Toby Parnell</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Lost Deals -->
+<div class="section">
+    <h2>Lost Deals</h2>
+    <p class="desc">Sorted by weighted value — the deals at the top were the ones we were most counting on.</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Stage Reached</th>
+                    <th class="num">Fees</th>
+                    <th class="num">Likelihood</th>
+                    <th class="num">Weighted Value Lost</th>
+                    <th>Loss Reason</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>Europe Snacks - Project</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">1,750,000</td>
+            <td class="num">30%</td>
+            <td class="num">525,000</td>
+            <td>Client Capacity</td>
+        </tr><tr>
+            <td>2 Sisters - Cost Out</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">2,500,000</td>
+            <td class="num">20%</td>
+            <td class="num">500,000</td>
+            <td>Lost To Newton: Our Perceived Capacity</td>
+        </tr><tr>
+            <td>Park Cakes - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">1,000,000</td>
+            <td class="num">30%</td>
+            <td class="num">300,000</td>
+            <td>Wanted To Do Themselves</td>
+        </tr><tr>
+            <td>Greencore - Diagnostic</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">1,400,000</td>
+            <td class="num">15%</td>
+            <td class="num">210,000</td>
+            <td>Cost And Not Enough Scale</td>
+        </tr><tr>
+            <td>Warburtons - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">2,000,000</td>
+            <td class="num">10%</td>
+            <td class="num">200,000</td>
+            <td>Went Silent</td>
+        </tr><tr>
+            <td>Britvic - OEE Improvement</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,500,000</td>
+            <td class="num">10%</td>
+            <td class="num">150,000</td>
+            <td>Not Enough Opportunity</td>
+        </tr><tr>
+            <td>Natara - Assessment</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">200,000</td>
+            <td class="num">70%</td>
+            <td class="num">140,000</td>
+            <td>Not Enough Opportunity</td>
+        </tr><tr>
+            <td>ABP Beef - Throughput</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,000,000</td>
+            <td class="num">10%</td>
+            <td class="num">100,000</td>
+            <td>Not Enough Opportunity</td>
+        </tr><tr>
+            <td>WARP Snacks - Ops Extension</td>
+            <td>1 - Potential</td>
+            <td class="num">500,000</td>
+            <td class="num">20%</td>
+            <td class="num">100,000</td>
+            <td>Wanted To Do Themselves</td>
+        </tr><tr>
+            <td>SHP Value Added Services (Halo) - Redzone Support</td>
+            <td>2 - 1st Call</td>
+            <td class="num">100,000</td>
+            <td class="num">80%</td>
+            <td class="num">80,000</td>
+            <td>Fizzled Out</td>
+        </tr><tr>
+            <td>SBFM - Operational support</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">350,000</td>
+            <td class="num">20%</td>
+            <td class="num">70,000</td>
+            <td>Did Not Want Consultants</td>
+        </tr><tr>
+            <td>Vintage Cash Cow - Support</td>
+            <td>1 - Potential</td>
+            <td class="num">300,000</td>
+            <td class="num">20%</td>
+            <td class="num">60,000</td>
+            <td>Fizzled Out</td>
+        </tr><tr>
+            <td>Stonegate Pubs - Throughput</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">300,000</td>
+            <td class="num">20%</td>
+            <td class="num">60,000</td>
+            <td>majaco Capacity</td>
+        </tr><tr>
+            <td>Hain Celestial - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">500,000</td>
+            <td class="num">10%</td>
+            <td class="num">50,000</td>
+            <td>Went Silent</td>
+        </tr><tr>
+            <td>Pickenpack - 1 Line Pilot</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">243,000</td>
+            <td class="num">20%</td>
+            <td class="num">48,600</td>
+            <td>Senior Client Blocked</td>
+        </tr><tr>
+            <td>Pratts - Logistics improvement</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">400,000</td>
+            <td class="num">10%</td>
+            <td class="num">40,000</td>
+            <td>Senior Client Blocked</td>
+        </tr><tr>
+            <td>Williams - Time-cost study</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">600,000</td>
+            <td class="num">5%</td>
+            <td class="num">30,000</td>
+            <td>Did Not Like Proposal</td>
+        </tr><tr>
+            <td>Crosta and Mollica - Cost Out</td>
+            <td>2 - 1st Call</td>
+            <td class="num">100,000</td>
+            <td class="num">30%</td>
+            <td class="num">30,000</td>
+            <td>Too Small For Us</td>
+        </tr><tr>
+            <td>SHP - End to End cost to serve</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">120,000</td>
+            <td class="num">20%</td>
+            <td class="num">24,000</td>
+            <td>Senior Client Blocked</td>
+        </tr><tr>
+            <td>Fortnum and Mason - Service Level</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">100,000</td>
+            <td class="num">20%</td>
+            <td class="num">20,000</td>
+            <td>Fizzled Out</td>
+        </tr><tr>
+            <td>Michael’s of Brooklyn - Scoping</td>
+            <td>1 - Potential</td>
+            <td class="num">200,000</td>
+            <td class="num">10%</td>
+            <td class="num">20,000</td>
+            <td>Went Silent</td>
+        </tr><tr>
+            <td>Partners - Day Rate Support</td>
+            <td>2 - 1st Call</td>
+            <td class="num">200,000</td>
+            <td class="num">10%</td>
+            <td class="num">20,000</td>
+            <td>Can't afford our Day Rate</td>
+        </tr><tr>
+            <td>Marston's - Throughput Assessment</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">50,000</td>
+            <td class="num">10%</td>
+            <td class="num">5,000</td>
+            <td>Fizzled Out</td>
+        </tr><tr>
+            <td>RKW North America - Site Improvement</td>
+            <td>1 - Potential</td>
+            <td class="num">100,000</td>
+            <td class="num">5%</td>
+            <td class="num">5,000</td>
+            <td>Went Silent</td>
+        </tr><tr>
+            <td>Proper Snack - Planning Reporting</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">50,000</td>
+            <td class="num">5%</td>
+            <td class="num">2,500</td>
+            <td>Wanted To Do Themselves</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Current Pipeline Detail -->
+<div class="section">
+    <h2>Current Pursuing Pipeline</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Stage</th>
+                    <th class="num">Fees</th>
+                    <th class="num">Likelihood</th>
+                    <th class="num">Weighted</th>
+                    <th>Expected Start</th>
+                    <th>Owner</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody><tr>
+            <td>Europe Snacks - Project</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">1,750,000</td>
+            <td class="num lk-mid">30%</td>
+            <td class="num">525,000</td>
+            <td>2026-09-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Becketts - Labour Productivity</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">750,000</td>
+            <td class="num lk-mid">50%</td>
+            <td class="num">375,000</td>
+            <td>2026-04-13</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Evergreen Garden Care - Service Level Delivery</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,500,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">300,000</td>
+            <td>2026-10-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Ornua - Giveaway and Speed</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">1,600,000</td>
+            <td class="num lk-low">15%</td>
+            <td class="num">240,000</td>
+            <td>2027-01-01</td>
+            <td>Sam Rooza</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Assisi Pet Care Cost Out - Project</td>
+            <td>1 - Potential</td>
+            <td class="num">800,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">160,000</td>
+            <td>2026-04-15</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Greencore - Implementation Support</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">15%</td>
+            <td class="num">150,000</td>
+            <td>2026-07-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>LT Foods - OEE Improvement</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">700,000</td>
+            <td class="num lk-low">15%</td>
+            <td class="num">105,000</td>
+            <td>2026-10-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Compleat - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">100,000</td>
+            <td>2026-12-01</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Pukka Pies - BOM & Waste</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">124,200</td>
+            <td class="num lk-high">70%</td>
+            <td class="num">86,940</td>
+            <td>2026-03-09</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Samworth Brothers - Group Data Visualisation</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,500,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">75,000</td>
+            <td>2027-01-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Becketts - Assessment</td>
+            <td>5 - Ax Signed</td>
+            <td class="num">75,000</td>
+            <td class="num lk-high">100%</td>
+            <td class="num">75,000</td>
+            <td>2026-03-02</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Lucozade Ribena (Suntory UK) - Capacity</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">50,000</td>
+            <td>2027-01-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Fenmarc Produce - Cost Out</td>
+            <td>1 - Potential</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">50,000</td>
+            <td>2026-06-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Amtico Flooring - Quality</td>
+            <td>1 - Potential</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">50,000</td>
+            <td>2026-07-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Branston Potatoes - Capacity</td>
+            <td>1 - Potential</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">50,000</td>
+            <td>2026-07-01</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Samworth Bradgate - Food to Go</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">1,000,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">50,000</td>
+            <td>2026-09-01</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Hilton Food Group</td>
+            <td>2 - 1st Call</td>
+            <td class="num">500,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">50,000</td>
+            <td>-</td>
+            <td>Nick Gale</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>VeeTee - Service Level & Capacity</td>
+            <td>1 - Potential</td>
+            <td class="num">150,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">30,000</td>
+            <td>2027-01-01</td>
+            <td>James Littlewood</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Assisi Pet Care - Assessment</td>
+            <td>4 - Ax Proposal</td>
+            <td class="num">75,000</td>
+            <td class="num lk-mid">40%</td>
+            <td class="num">30,000</td>
+            <td>2026-05-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>GU Puddings - Stock Modelling</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">55,000</td>
+            <td class="num lk-mid">50%</td>
+            <td class="num">27,500</td>
+            <td>2026-03-09</td>
+            <td>James Littlewood</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Redzone Deployment 2</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">30,000</td>
+            <td class="num lk-high">90%</td>
+            <td class="num">27,000</td>
+            <td>2026-05-04</td>
+            <td>Toby Parnell</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>TDR Capital - Portfolio Cos</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">500,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">25,000</td>
+            <td>2027-06-07</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Redzone Deployment 1</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">25,000</td>
+            <td class="num lk-high">100%</td>
+            <td class="num">25,000</td>
+            <td>2026-03-30</td>
+            <td>Jack Taylor</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Evergreen Garden Care - Service Level Assessment</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">75,000</td>
+            <td class="num lk-low">25%</td>
+            <td class="num">18,750</td>
+            <td>2026-09-01</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Tayto - Cost Out</td>
+            <td>2 - 1st Call</td>
+            <td class="num">85,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">17,000</td>
+            <td>2026-09-07</td>
+            <td>Toby Parnell</td>
+            <td>1 - Rock</td>
+        </tr><tr>
+            <td>Samworth Walkers Sausage - Assessment</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">100,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">10,000</td>
+            <td>2027-07-05</td>
+            <td>Toby Parnell</td>
+            <td>2 - Pebble</td>
+        </tr><tr>
+            <td>Gymkhana Fine Foods - 100k Process Design & Install</td>
+            <td>1 - Potential</td>
+            <td class="num">50,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">10,000</td>
+            <td>2026-06-01</td>
+            <td>Sam Rooza</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Proper Snacks - Planning Tools Update</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">10,000</td>
+            <td class="num lk-high">85%</td>
+            <td class="num">8,500</td>
+            <td>2026-03-16</td>
+            <td>James Littlewood</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Proper - Technical Problem Solving</td>
+            <td>1 - Potential</td>
+            <td class="num">80,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">8,000</td>
+            <td>2026-05-01</td>
+            <td>James Littlewood</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Pro-Pak Foods - Assessment</td>
+            <td>1 - Potential</td>
+            <td class="num">40,000</td>
+            <td class="num lk-low">15%</td>
+            <td class="num">6,000</td>
+            <td>2026-05-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>AH Worth - Cost Out</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">50,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">5,000</td>
+            <td>2027-01-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Gymkhana Fine Foods - Ongoing Support at CPU</td>
+            <td>6 - Project Proposal</td>
+            <td class="num">10,000</td>
+            <td class="num lk-mid">50%</td>
+            <td class="num">5,000</td>
+            <td>2026-05-04</td>
+            <td>Sam Rooza</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Langfords - Assessment</td>
+            <td>2 - 1st Call</td>
+            <td class="num">50,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">5,000</td>
+            <td>2026-07-01</td>
+            <td>Sam Rooza</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Red Sky Food Group (Delenco/Langfords) - Assessment</td>
+            <td>2 - 1st Call</td>
+            <td class="num">50,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">5,000</td>
+            <td>2026-07-01</td>
+            <td>Sam Rooza</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>GU Puddings - Problem Solving Support</td>
+            <td>1 - Potential</td>
+            <td class="num">20,000</td>
+            <td class="num lk-low">20%</td>
+            <td class="num">4,000</td>
+            <td>2026-03-30</td>
+            <td>Toby Parnell</td>
+            <td>4 - Dust</td>
+        </tr><tr>
+            <td>Butternut Box - Connected Worker & PowerBI Dash</td>
+            <td>3 - 1st Meet</td>
+            <td class="num">50,000</td>
+            <td class="num lk-low">5%</td>
+            <td class="num">2,500</td>
+            <td>2026-10-01</td>
+            <td>Toby Parnell</td>
+            <td>3 - Sand</td>
+        </tr><tr>
+            <td>Clyde Fasteners - maji Licence</td>
+            <td>1 - Potential</td>
+            <td class="num">12,000</td>
+            <td class="num lk-low">10%</td>
+            <td class="num">1,200</td>
+            <td>2026-04-06</td>
+            <td>Jamie Diamond</td>
+            <td>4 - Dust</td>
+        </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Not Pursuing -->
+<div class="section">
+    <h2>Not Pursuing (0 deals, &pound;0 fees)</h2>
+    <p class="desc">Opportunities parked or deprioritised. Worth revisiting periodically.</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Stage</th>
+                    <th class="num">Fees</th>
+                    <th>Expected Start</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Status Counts Over Time -->
+<div class="section">
+    <h2>Opportunity Status Over Time</h2>
+    <p class="desc">How the pipeline composition changes week to week across all statuses.</p>
+    <div class="chart-grid">
+        <div class="chart-card wide">
+            <h3>Deals by Status</h3>
+            <canvas id="statusOverTime"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Data Coverage -->
+<div class="section">
+    <h2>Data Coverage</h2>
+    <p class="desc">CRM data captured in this snapshot for future analysis (including sentiment analysis on text fields).</p>
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="value">3201</div>
+            <div class="label">Text Fields Captured</div>
+        </div>
+        <div class="kpi">
+            <div class="value">841</div>
+            <div class="label">CRM Records Indexed</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    majaco Pipeline Prediction Report &middot; Generated 11 March 2026<br>
+    Data sourced from 2 weekly snapshots of the Notion CRM &middot; 3201 text fields indexed for sentiment analysis
+</div>
+
+</div>
+
+<script>
+const COLORS = {
+    blue: '#2563eb',
+    blueFade: 'rgba(37, 99, 235, 0.15)',
+    green: '#059669',
+    greenFade: 'rgba(5, 150, 105, 0.15)',
+    red: '#dc2626',
+    redFade: 'rgba(220, 38, 38, 0.15)',
+    amber: '#d97706',
+    amberFade: 'rgba(217, 119, 6, 0.15)',
+    grey: '#94a3b8',
+    greyFade: 'rgba(148, 163, 184, 0.1)',
+};
+
+const currencyFmt = (v) => '\u00A3' + v.toLocaleString('en-GB', {maximumFractionDigits: 0});
+
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#4a5568';
+
+// Momentum Counts Chart
+new Chart(document.getElementById('momentumCounts'), {
+    type: 'doughnut',
+    data: {
+        labels: ["Advancing", "Stalling", "At Risk", "Neutral", "No Commentary"],
+        datasets: [{
+            data: [7, 12, 5, 13, 0],
+            backgroundColor: ['#059669', '#d97706', '#dc2626', '#94a3b8', '#e2e8f0'],
+            borderWidth: 2,
+            borderColor: '#fff',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right', labels: { boxWidth: 12, padding: 10 } }
+        }
+    }
+});
+
+// Momentum Values Chart
+new Chart(document.getElementById('momentumValues'), {
+    type: 'bar',
+    data: {
+        labels: ["Advancing", "Stalling", "At Risk", "Neutral", "No Commentary"],
+        datasets: [{
+            data: [367440.0, 428200.0, 691000.0, 1275750.0, 0],
+            backgroundColor: ['rgba(5,150,105,0.2)', 'rgba(217,119,6,0.2)', 'rgba(220,38,38,0.2)', 'rgba(148,163,184,0.1)', 'rgba(226,232,240,0.3)'],
+            borderColor: ['#059669', '#d97706', '#dc2626', '#94a3b8', '#cbd5e1'],
+            borderWidth: 1.5,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => currencyFmt(ctx.raw) } }
+        },
+        scales: {
+            y: { ticks: { callback: (v) => currencyFmt(v) } }
+        }
+    }
+});
+
+// Positive Signals Chart
+new Chart(document.getElementById('positiveSignals'), {
+    type: 'bar',
+    data: {
+        labels: ["reached out", "site visit", "agreed", "meeting arranged", "presenting", "proposal submitted", "confirmed", "follow up monday", "budget approval", "assessment underway"],
+        datasets: [{
+            data: [3, 2, 2, 1, 1, 1, 1, 1, 1, 1],
+            backgroundColor: COLORS.greenFade,
+            borderColor: COLORS.green,
+            borderWidth: 1.5,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { stepSize: 1 } }
+        }
+    }
+});
+
+// Loss by Stage Chart
+new Chart(document.getElementById('lossByStage'), {
+    type: 'bar',
+    data: {
+        labels: ["6 - Project Proposal", "1 - Potential", "4 - Ax Proposal", "3 - 1st Meet", "2 - 1st Call"],
+        datasets: [{
+            label: 'Weighted Value Lost',
+            data: [1010100.0, 735000.0, 665000.0, 250000.0, 130000.0],
+            backgroundColor: COLORS.redFade,
+            borderColor: COLORS.red,
+            borderWidth: 1.5,
+            borderRadius: 4,
+        },
+        {
+            label: 'Total Fees',
+            data: [5213000.0, 4600000.0, 2850000.0, 2500000.0, 400000.0],
+            backgroundColor: COLORS.greyFade,
+            borderColor: COLORS.grey,
+            borderWidth: 1.5,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + currencyFmt(ctx.raw) } }
+        },
+        scales: {
+            y: { ticks: { callback: (v) => currencyFmt(v) } }
+        }
+    }
+});
+
+// Stage Fees Chart
+new Chart(document.getElementById('stageFees'), {
+    type: 'bar',
+    data: {
+        labels: ["1 - Potential", "2 - 1st Call", "3 - 1st Meet", "4 - Ax Proposal", "6 - Project Proposal"],
+        datasets: [
+            {
+                label: 'Total Fees',
+                data: [5152000.0, 685000.0, 7525000.0, 775000.0, 3604200.0],
+                backgroundColor: COLORS.blueFade,
+                borderColor: COLORS.blue,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            },
+            {
+                label: 'Weighted Value',
+                data: [469200.0, 77000.0, 1061250.0, 135000.0, 944940.0],
+                backgroundColor: COLORS.amberFade,
+                borderColor: COLORS.amber,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + currencyFmt(ctx.raw) } }
+        },
+        scales: {
+            y: { ticks: { callback: (v) => currencyFmt(v) } }
+        }
+    }
+});
+
+// Stage Likelihood Chart
+new Chart(document.getElementById('stageLikelihood'), {
+    type: 'bar',
+    data: {
+        labels: ["1 - Potential", "2 - 1st Call", "3 - 1st Meet", "4 - Ax Proposal", "6 - Project Proposal"],
+        datasets: [{
+            label: 'Avg Likelihood',
+            data: [12.7, 12.5, 14.1, 27.5, 61.3],
+            backgroundColor: ["rgba(220, 38, 38, 0.2)", "rgba(220, 38, 38, 0.2)", "rgba(220, 38, 38, 0.2)", "rgba(217, 119, 6, 0.2)", "rgba(5, 150, 105, 0.2)"],
+            borderColor: ["#dc2626", "#dc2626", "#dc2626", "#d97706", "#059669"],
+            borderWidth: 1.5,
+            borderRadius: 4,
+        },
+        {
+            label: 'Deal Count',
+            data: [11, 4, 11, 2, 8],
+            type: 'line',
+            borderColor: COLORS.grey,
+            backgroundColor: COLORS.greyFade,
+            yAxisID: 'count',
+            tension: 0.3,
+            pointRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: { callbacks: { label: (ctx) => {
+                if (ctx.dataset.label === 'Avg Likelihood') return ctx.raw + '%';
+                return ctx.raw + ' deals';
+            } } }
+        },
+        scales: {
+            y: { max: 100, ticks: { callback: (v) => v + '%' } },
+            count: { position: 'right', grid: { display: false }, title: { display: true, text: 'Deals' } }
+        }
+    }
+});
+
+// Prediction Accuracy Chart
+new Chart(document.getElementById('accuracyChart'), {
+    type: 'bar',
+    data: {
+        labels: ["1 - Potential", "2 - 1st Call", "3 - 1st Meet", "4 - Ax Proposal", "6 - Project Proposal"],
+        datasets: [
+            {
+                label: 'Predicted Likelihood',
+                data: [15.0, 40.0, 10.0, 30.0, 14.4],
+                backgroundColor: COLORS.blueFade,
+                borderColor: COLORS.blue,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            },
+            {
+                label: 'Actual Win Rate',
+                data: [0.0, 0.0, 0.0, 0.0, 0.0],
+                backgroundColor: COLORS.greenFade,
+                borderColor: COLORS.green,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.raw + '%' } }
+        },
+        scales: {
+            y: { max: 100, ticks: { callback: (v) => v + '%' } }
+        }
+    }
+});
+
+// Win Reasons Chart
+new Chart(document.getElementById('winReasons'), {
+    type: 'doughnut',
+    data: {
+        labels: ["Track Record", "Relationship", "Referral Trust", "Networking", "Assessment Output", "Won Tender", "Capability"],
+        datasets: [{
+            data: [6, 4, 4, 2, 2, 1, 1],
+            backgroundColor: [
+                '#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0',
+                '#2563eb', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#818cf8'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } }
+        }
+    }
+});
+
+// Loss Reasons Chart
+new Chart(document.getElementById('lossReasons'), {
+    type: 'bar',
+    data: {
+        labels: ["Went Silent", "Fizzled Out", "Wanted To Do Themselves", "Senior Client Blocked", "Not Enough Opportunity", "majaco Capacity", "Too Small For Us", "Lost To Newton: Our Perceived Capacity", "Did Not Want Consultants", "Did Not Like Proposal", "Cost And Not Enough Scale", "Client Capacity", "Can't afford our Day Rate"],
+        datasets: [{
+            data: [4, 4, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1],
+            backgroundColor: COLORS.redFade,
+            borderColor: COLORS.red,
+            borderWidth: 1.5,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { stepSize: 1 } }
+        }
+    }
+});
+
+// Pipeline Over Time
+new Chart(document.getElementById('timeChart'), {
+    type: 'line',
+    data: {
+        labels: ["2026-03-10", "2026-03-11"],
+        datasets: [
+            {
+                label: 'Total Pipeline Fees',
+                data: [18516200.0, 17816200.0],
+                borderColor: COLORS.blue,
+                backgroundColor: COLORS.blueFade,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            },
+            {
+                label: 'Weighted Pipeline',
+                data: [2827390.0, 2762390.0],
+                borderColor: COLORS.amber,
+                backgroundColor: COLORS.amberFade,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + currencyFmt(ctx.raw) } }
+        },
+        scales: {
+            y: { ticks: { callback: (v) => currencyFmt(v) } }
+        }
+    }
+});
+
+// Status Over Time (stacked bar)
+new Chart(document.getElementById('statusOverTime'), {
+    type: 'bar',
+    data: {
+        labels: ["2026-03-10", "2026-03-11"],
+        datasets: [
+            {
+                label: 'Pursuing',
+                data: [39, 37],
+                backgroundColor: COLORS.blue,
+                borderRadius: 2,
+            },
+            {
+                label: 'Not Pursuing',
+                data: [4, 0],
+                backgroundColor: COLORS.grey,
+                borderRadius: 2,
+            },
+            {
+                label: 'Won',
+                data: [19, 19],
+                backgroundColor: COLORS.green,
+                borderRadius: 2,
+            },
+            {
+                label: 'Lost',
+                data: [18, 24],
+                backgroundColor: COLORS.red,
+                borderRadius: 2,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: { stacked: true },
+            y: { stacked: true, ticks: { stepSize: 5 } }
+        },
+        plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } },
+            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.raw + ' deals' } }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
